@@ -1,0 +1,533 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accesorio {
+  id_accesorio     Int      @id @default(autoincrement())
+  codigo           String   @unique(map: "codigo") @db.VarChar(20)
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+  id_modelo        Int
+  id_almacen       Int
+  modelo           modelo   @relation(fields: [id_modelo], references: [id_modelo], onUpdate: Restrict, map: "Relationship18")
+  almacen          almacen  @relation(fields: [id_almacen], references: [id_almacen], onUpdate: Restrict, map: "Relationship19")
+
+  @@index([id_modelo], map: "IX_Relationship18")
+  @@index([id_almacen], map: "IX_Relationship19")
+}
+
+model almacen {
+  id_almacen       Int              @id @default(autoincrement())
+  codigo           String           @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String           @db.VarChar(150)
+  existencia       Int
+  precio_compra    Decimal          @db.Decimal(10, 2)
+  color            String           @db.VarChar(20)
+  minimo           Int
+  maximo           Int
+  imagen           String           @db.Text
+  fecha_creado     DateTime         @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime         @default(now()) @db.Timestamp(0)
+  estatus          String           @db.Char(1)
+  id_unidad        Int
+  id_tipo_insumo   Int
+  accesorio        accesorio[]
+  unidad           unidad           @relation(fields: [id_unidad], references: [id_unidad], onUpdate: Restrict, map: "Relationship15")
+  tipo_insumo      tipo_insumo      @relation(fields: [id_tipo_insumo], references: [id_tipo_insumo], onUpdate: Restrict, map: "Relationship16")
+  corte_tela       corte_tela[]
+  detalle_compra   detalle_compra[]
+
+  @@index([id_unidad], map: "IX_Relationship15")
+  @@index([id_tipo_insumo], map: "IX_Relationship16")
+}
+
+model archivo {
+  id_archivo       Int      @id @default(autoincrement())
+  archivo          String   @db.Text
+  tipo             String   @db.VarChar(20)
+  id_registro      Int
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+}
+
+model colonia {
+  id_colonia       Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  nombre           String    @db.Char(70)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  id_localidad     Int
+  calle            calle[]
+  localidad        localidad @relation(fields: [id_localidad], references: [id_localidad], onUpdate: Restrict, map: "Relationship4")
+
+  @@index([id_localidad], map: "IX_Relationship4")
+}
+
+model compra {
+  id_compra        Int              @id @default(autoincrement())
+  codigo           String           @unique(map: "codigo") @db.VarChar(20)
+  fecha            DateTime         @db.Date
+  fecha_creado     DateTime         @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime         @default(now()) @db.Timestamp(0)
+  estatus          String           @db.Char(1)
+  detalle_compra   detalle_compra[]
+}
+
+model corte {
+  id_corte         Int            @id @default(autoincrement())
+  codigo           String         @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String         @db.VarChar(200)
+  fecha_registro   DateTime       @default(now()) @db.Timestamp(0)
+  fecha_inicio     DateTime       @default(now()) @db.Timestamp(0)
+  fecha_termino    DateTime       @default(now()) @db.Timestamp(0)
+  fecha_creado     DateTime       @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime       @default(now()) @db.Timestamp(0)
+  estatus          String         @db.Char(1)
+  id_usuario       Int
+  id_estatus_corte Int
+  usuario          usuario        @relation(fields: [id_usuario], references: [id_usuario], onUpdate: Restrict, map: "Relationship32")
+  estatus_corte    estatus_corte  @relation(fields: [id_estatus_corte], references: [id_estatus_corte], onUpdate: Restrict, map: "Relationship34")
+  corte_modelo     corte_modelo[]
+  corte_tela       corte_tela[]
+
+  @@index([id_usuario], map: "IX_Relationship32")
+  @@index([id_estatus_corte], map: "IX_Relationship34")
+}
+
+model corte_modelo {
+  id_corte_modelo     Int                   @id @default(autoincrement())
+  codigo              String                @unique(map: "codigo") @db.VarChar(20)
+  cantidad            Int
+  fecha_creado        DateTime              @default(now()) @db.Timestamp(0)
+  fecha_modificado    DateTime              @default(now()) @db.Timestamp(0)
+  estatus             String                @db.Char(1)
+  id_corte            Int
+  id_modelo           Int
+  corte               corte                 @relation(fields: [id_corte], references: [id_corte], onUpdate: Restrict, map: "Relationship23")
+  modelo              modelo                @relation(fields: [id_modelo], references: [id_modelo], onUpdate: Restrict, map: "Relationship24")
+  corte_modelo_piezas corte_modelo_piezas[]
+  det_maq_corte       det_maq_corte[]
+
+  @@index([id_corte], map: "IX_Relationship23")
+  @@index([id_modelo], map: "IX_Relationship24")
+}
+
+model corte_modelo_piezas {
+  id_corte_modelo_piezas Int              @id @default(autoincrement())
+  cantidad               Int
+  fecha_creado           DateTime         @default(now()) @db.Timestamp(0)
+  fecha_modificado       DateTime         @default(now()) @db.Timestamp(0)
+  estatus                String           @db.Char(1)
+  id_corte_modelo        Int
+  corte_modelo           corte_modelo     @relation(fields: [id_corte_modelo], references: [id_corte_modelo], onUpdate: Restrict, map: "Relationship35")
+  det_maq_piezas         det_maq_piezas[]
+
+  @@index([id_corte_modelo], map: "IX_Relationship35")
+}
+
+model corte_tela {
+  id_corte_tela      Int             @id @default(autoincrement())
+  codigo             String          @unique(map: "codigo") @db.VarChar(20)
+  rollos             Decimal         @db.Decimal(10, 2)
+  tendidas           Decimal         @db.Decimal(10, 2)
+  inicio             DateTime        @default(now()) @db.Timestamp(0)
+  fin                DateTime        @default(now()) @db.Timestamp(0)
+  comentarios        String?         @db.VarChar(200)
+  fecha_creado       DateTime        @default(now()) @db.Timestamp(0)
+  fecha_modificado   DateTime        @default(now()) @db.Timestamp(0)
+  estatus            String          @db.Char(1)
+  id_corte           Int
+  id_almacen         Int
+  id_estatus_tendida Int
+  corte              corte           @relation(fields: [id_corte], references: [id_corte], onUpdate: Restrict, map: "Relationship22")
+  almacen            almacen         @relation(fields: [id_almacen], references: [id_almacen], onUpdate: Restrict, map: "Relationship25")
+  estatus_tendida    estatus_tendida @relation(fields: [id_estatus_tendida], references: [id_estatus_tendida], onUpdate: Restrict, map: "Relationship26")
+
+  @@index([id_corte], map: "IX_Relationship22")
+  @@index([id_almacen], map: "IX_Relationship25")
+  @@index([id_estatus_tendida], map: "IX_Relationship26")
+}
+
+model det_maq_corte {
+  id_det_maq_corte   Int             @id @default(autoincrement())
+  fecha_creado       DateTime        @default(now()) @db.Timestamp(0)
+  fecha_modificado   DateTime        @default(now()) @db.Timestamp(0)
+  estatus            String          @db.Char(1)
+  id_detalle_maquila Int
+  id_corte_modelo    Int
+  detalle_maquila    detalle_maquila @relation(fields: [id_detalle_maquila], references: [id_detalle_maquila], onUpdate: Restrict, map: "Relationship39")
+  corte_modelo       corte_modelo    @relation(fields: [id_corte_modelo], references: [id_corte_modelo], onUpdate: Restrict, map: "Relationship40")
+
+  @@index([id_detalle_maquila], map: "IX_Relationship39")
+  @@index([id_corte_modelo], map: "IX_Relationship40")
+}
+
+model det_maq_piezas {
+  id_det_maq_piezas      Int                 @id @default(autoincrement())
+  fecha_creado           DateTime            @default(now()) @db.Timestamp(0)
+  fecha_modificado       DateTime            @default(now()) @db.Timestamp(0)
+  estatus                String              @db.Char(1)
+  id_detalle_maquila     Int
+  id_corte_modelo_piezas Int
+  detalle_maquila        detalle_maquila     @relation(fields: [id_detalle_maquila], references: [id_detalle_maquila], onUpdate: Restrict, map: "Relationship37")
+  corte_modelo_piezas    corte_modelo_piezas @relation(fields: [id_corte_modelo_piezas], references: [id_corte_modelo_piezas], onUpdate: Restrict, map: "Relationship38")
+
+  @@index([id_detalle_maquila], map: "IX_Relationship37")
+  @@index([id_corte_modelo_piezas], map: "IX_Relationship38")
+}
+
+model detalle_compra {
+  id_detalle_compra Int      @id @default(autoincrement())
+  codigo            String   @unique(map: "codigo") @db.VarChar(20)
+  cantidad          Decimal  @db.Decimal(10, 2)
+  precio            Decimal  @db.Decimal(10, 2)
+  fecha_creado      DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado  DateTime @default(now()) @db.Timestamp(0)
+  estatus           String   @db.Char(1)
+  id_compra         Int
+  id_almacen        Int
+  compra            compra   @relation(fields: [id_compra], references: [id_compra], onUpdate: Restrict, map: "Relationship20")
+  almacen           almacen  @relation(fields: [id_almacen], references: [id_almacen], onUpdate: Restrict, map: "Relationship21")
+
+  @@index([id_compra], map: "IX_Relationship20")
+  @@index([id_almacen], map: "IX_Relationship21")
+}
+
+model detalle_maquila {
+  id_detalle_maquila Int               @id @default(autoincrement())
+  fecha_creado       DateTime          @default(now()) @db.Timestamp(0)
+  fecha_modificado   DateTime          @default(now()) @db.Timestamp(0)
+  estatus            String            @db.Char(1)
+  id_maquila         Int
+  det_maq_corte      det_maq_corte[]
+  det_maq_piezas     det_maq_piezas[]
+  maquila            maquila           @relation(fields: [id_maquila], references: [id_maquila], onUpdate: Restrict, map: "Relationship27")
+  entrega_maquila    entrega_maquila[]
+
+  @@index([id_maquila], map: "IX_Relationship27")
+}
+
+model detalle_modelo {
+  id_detalle_modelo Int      @id @default(autoincrement())
+  codigo            String   @unique(map: "codigo") @db.VarChar(20)
+  descripcion       String   @db.VarChar(200)
+  cantidad          Int
+  fecha_creado      DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado  DateTime @default(now()) @db.Timestamp(0)
+  estatus           String   @db.Char(1)
+  id_modelo         Int
+  modelo            modelo   @relation(fields: [id_modelo], references: [id_modelo], onUpdate: Restrict, map: "Relationship17")
+
+  @@index([id_modelo], map: "IX_Relationship17")
+}
+
+model detalle_venta {
+  id_detalle_venta Int        @id @default(autoincrement())
+  precio_venta     Decimal    @db.Decimal(10, 2)
+  precio_costo     Decimal    @db.Decimal(10, 2)
+  cantidad         String     @db.Char(1)
+  id_venta         Int
+  id_inventario    Int
+  venta            venta      @relation(fields: [id_venta], references: [id_venta], onUpdate: Restrict, map: "Relationship41")
+  inventario       inventario @relation(fields: [id_inventario], references: [id_inventario], onUpdate: Restrict, map: "Relationship42")
+
+  @@index([id_venta], map: "IX_Relationship41")
+  @@index([id_inventario], map: "IX_Relationship42")
+}
+
+model entrega_maquila {
+  id_entrega       Int             @id @default(autoincrement())
+  codigo           String          @unique(map: "codigo") @db.VarChar(20)
+  fecha_entrega    DateTime        @default(now()) @db.Timestamp(0)
+  cantidad         Int
+  comentarios      String          @db.Text
+  fecha_creado     DateTime        @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime        @default(now()) @db.Timestamp(0)
+  estatus          String          @db.Char(1)
+  id_corte_maquila Int
+  id_persona       Int
+  detalle_maquila  detalle_maquila @relation(fields: [id_corte_maquila], references: [id_detalle_maquila], onUpdate: Restrict, map: "Relationship30")
+  persona          persona         @relation(fields: [id_persona], references: [id_persona], onUpdate: Restrict, map: "Relationship33")
+
+  @@index([id_corte_maquila], map: "IX_Relationship30")
+  @@index([id_persona], map: "IX_Relationship33")
+}
+
+model estado {
+  id_estado        Int         @id @default(autoincrement())
+  codigo           String      @unique(map: "codigo") @db.VarChar(20)
+  nombre           String      @db.VarChar(70)
+  fecha_creado     DateTime    @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime    @default(now()) @db.Timestamp(0)
+  estatus          String      @db.Char(1)
+  municipio        municipio[]
+}
+
+model estatus_corte {
+  id_estatus_corte Int      @id @default(autoincrement())
+  codigo           String   @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String   @db.VarChar(200)
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+  corte            corte[]
+}
+
+model estatus_tendida {
+  id_estatus_tendida Int          @id @default(autoincrement())
+  codigo             String       @unique(map: "codigo") @db.VarChar(20)
+  descripcion        String       @db.VarChar(200)
+  fecha_creado       DateTime     @default(now()) @db.Timestamp(0)
+  fecha_modificado   DateTime     @default(now()) @db.Timestamp(0)
+  estatus            String       @db.Char(1)
+  corte_tela         corte_tela[]
+}
+
+model inventario {
+  id_inventario    Int             @id @default(autoincrement())
+  codigo           String          @unique(map: "codigo") @db.VarChar(20)
+  cantidad         Int
+  fecha_creado     DateTime        @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime        @default(now()) @db.Timestamp(0)
+  estatus          String          @db.Char(1)
+  id_modelo        Int
+  detalle_venta    detalle_venta[]
+  modelo           modelo          @relation(fields: [id_modelo], references: [id_modelo], onUpdate: Restrict, map: "Relationship31")
+
+  @@index([id_modelo], map: "IX_Relationship31")
+}
+
+model localidad {
+  id_localidad     Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  nombre           String    @db.VarChar(70)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  id_municipio     Int
+  colonia          colonia[]
+  municipio        municipio @relation(fields: [id_municipio], references: [id_municipio], onUpdate: Restrict, map: "Relationship3")
+
+  @@index([id_municipio], map: "IX_Relationship3")
+}
+
+model maquila {
+  id_maquila       Int               @id @default(autoincrement())
+  codigo           String            @unique(map: "codigo") @db.VarChar(20)
+  fecha_salida     DateTime          @default(now()) @db.Timestamp(0)
+  fecha_entrega    DateTime          @default(now()) @db.Timestamp(0)
+  fecha_creado     DateTime          @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime          @default(now()) @db.Timestamp(0)
+  estatus          String            @db.Char(1)
+  id_maquilador    Int
+  detalle_maquila  detalle_maquila[]
+  maquildor        maquildor         @relation(fields: [id_maquilador], references: [id_maquilador], onUpdate: Restrict, map: "Relationship29")
+
+  @@index([id_maquilador], map: "IX_Relationship29")
+}
+
+model maquildor {
+  id_maquilador    Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  nombre           String    @db.VarChar(70)
+  apepat           String    @db.VarChar(70)
+  apemat           String    @db.VarChar(70)
+  telefono         String    @db.VarChar(20)
+  correo           String    @db.VarChar(20)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  id_calle         Int
+  maquila          maquila[]
+  calle            calle     @relation(fields: [id_calle], references: [id_calle], onUpdate: Restrict, map: "Relationship48")
+
+  @@index([id_calle], map: "IX_Relationship48")
+}
+
+model modelo {
+  id_modelo        Int              @id @default(autoincrement())
+  codigo           String           @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String           @db.VarChar(200)
+  fecha_creado     DateTime         @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime         @default(now()) @db.Timestamp(0)
+  estatus          String           @db.Char(1)
+  accesorio        accesorio[]
+  corte_modelo     corte_modelo[]
+  detalle_modelo   detalle_modelo[]
+  inventario       inventario[]
+}
+
+model modulo {
+  id_modulo        Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String    @db.VarChar(70)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  permiso          permiso[]
+}
+
+model municipio {
+  id_municipio     Int         @id @default(autoincrement())
+  codigo           String      @unique(map: "codigo") @db.VarChar(20)
+  nombre           String      @db.VarChar(70)
+  fecha_creado     DateTime    @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime    @default(now()) @db.Timestamp(0)
+  estatus          String      @db.Char(1)
+  id_estado        Int
+  localidad        localidad[]
+  estado           estado      @relation(fields: [id_estado], references: [id_estado], onUpdate: Restrict, map: "Relationship1")
+
+  @@index([id_estado], map: "IX_Relationship1")
+}
+
+model permiso {
+  id_permiso       Int      @id @default(autoincrement())
+  id_usuario       Int
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+  id_modulo        Int?
+  usuario          usuario  @relation(fields: [id_usuario], references: [id_usuario], onUpdate: Restrict, map: "Relationship13")
+  modulo           modulo?  @relation(fields: [id_modulo], references: [id_modulo], onDelete: Restrict, onUpdate: Restrict, map: "Relationship14")
+
+  @@index([id_usuario], map: "IX_Relationship13")
+  @@index([id_modulo], map: "IX_Relationship14")
+}
+
+model persona {
+  id_persona       Int               @id @default(autoincrement())
+  codigo           String            @unique(map: "codigo") @db.VarChar(20)
+  nombre           String            @db.VarChar(70)
+  apepat           String            @db.VarChar(70)
+  apemat           String            @db.VarChar(70)
+  telefono         String            @db.VarChar(20)
+  correo           String            @db.VarChar(20)
+  fecha_creado     DateTime          @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime          @default(now()) @db.Timestamp(0)
+  estatus          String            @db.Char(1)
+  id_puesto        Int
+  id_calle         Int
+  entrega_maquila  entrega_maquila[]
+  puesto_trabajo   puesto_trabajo    @relation(fields: [id_puesto], references: [id_puesto], onUpdate: Restrict, map: "Relationship10")
+  calle            calle             @relation(fields: [id_calle], references: [id_calle], onUpdate: Restrict, map: "Relationship46")
+  usuario          usuario[]
+
+  @@index([id_puesto], map: "IX_Relationship10")
+  @@index([id_calle], map: "IX_Relationship46")
+}
+
+model plazas {
+  id_plaza         Int      @id @default(autoincrement())
+  codigo           String   @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String   @db.VarChar(200)
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+  venta            venta[]
+}
+
+model proveedor {
+  id_proveedor     Int      @id @default(autoincrement())
+  codigo           String   @unique(map: "codigo") @db.VarChar(20)
+  nombre           String   @db.VarChar(70)
+  apepat           String   @db.VarChar(70)
+  apemat           String   @db.VarChar(70)
+  telefono         String   @db.VarChar(20)
+  correo           String   @db.VarChar(50)
+  fecha_creado     DateTime @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime @default(now()) @db.Timestamp(0)
+  estatus          String   @db.Char(1)
+  id_calle         Int
+  calle            calle    @relation(fields: [id_calle], references: [id_calle], onUpdate: Restrict, map: "Relationship47")
+
+  @@index([id_calle], map: "IX_Relationship47")
+}
+
+model puesto_trabajo {
+  id_puesto        Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String    @db.VarChar(150)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  persona          persona[]
+}
+
+model tipo_insumo {
+  id_tipo_insumo   Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String    @db.VarChar(70)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  almacen          almacen[]
+}
+
+model unidad {
+  id_unidad        Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  descripcion      String    @db.VarChar(70)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  estatus          String    @db.Char(1)
+  almacen          almacen[]
+}
+
+model usuario {
+  id_usuario       Int       @id @default(autoincrement())
+  codigo           String    @unique(map: "codigo") @db.VarChar(20)
+  usuario          String    @db.VarChar(15)
+  password         String    @db.VarChar(30)
+  fecha_creado     DateTime  @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime  @default(now()) @db.Timestamp(0)
+  id_persona       Int?
+  corte            corte[]
+  permiso          permiso[]
+  persona          persona?  @relation(fields: [id_persona], references: [id_persona], onDelete: Restrict, onUpdate: Restrict, map: "Relationship6")
+  venta            venta[]
+
+  @@index([id_persona], map: "IX_Relationship6")
+}
+
+model venta {
+  id_venta         Int             @id @default(autoincrement())
+  codigo           String          @unique(map: "codigo") @db.VarChar(20)
+  fecha_venta      DateTime        @default(now()) @db.Timestamp(0)
+  fecha_creado     DateTime        @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime        @default(now()) @db.Timestamp(0)
+  estatus          String          @db.Char(1)
+  id_usuario       Int
+  id_plaza         Int
+  detalle_venta    detalle_venta[]
+  usuario          usuario         @relation(fields: [id_usuario], references: [id_usuario], onUpdate: Restrict, map: "Relationship43")
+  plazas           plazas          @relation(fields: [id_plaza], references: [id_plaza], onUpdate: Restrict, map: "Relationship44")
+
+  @@index([id_usuario], map: "IX_Relationship43")
+  @@index([id_plaza], map: "IX_Relationship44")
+}
+
+model calle {
+  id_calle         Int         @id @default(autoincrement())
+  codigo           String      @unique(map: "codigo") @db.VarChar(20)
+  nombre           String      @db.VarChar(200)
+  numero           String      @db.VarChar(20)
+  fecha_creado     DateTime    @default(now()) @db.Timestamp(0)
+  fecha_modificado DateTime    @default(now()) @db.Timestamp(0)
+  estatus          String      @db.Char(1)
+  id_colonia       Int
+  colonia          colonia     @relation(fields: [id_colonia], references: [id_colonia], onUpdate: Restrict, map: "Relationship45")
+  maquildor        maquildor[]
+  persona          persona[]
+  proveedor        proveedor[]
+
+  @@index([id_colonia], map: "IX_Relationship45")
+}
